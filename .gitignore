@@ -1,0 +1,4 @@
+.DS_Store
+*.dwarf
+*.pid
+daemonizer
