@@ -4,8 +4,9 @@ class Daemonizer
 
   getter :command, :pid
 
+  @pid : Int64 = 0
+
   def initialize(@command : String)
-    @pid = 0
   end
 
   def start
@@ -35,7 +36,7 @@ class Daemonizer
   end
 
   def stop
-    kill Signal::TERM, "Process stopped"
+    signal Signal::TERM, "Process stopped"
   end
 
   def restart
@@ -44,14 +45,14 @@ class Daemonizer
   end
 
   def kill
-    kill Signal::KILL, "Process killed"
+    signal Signal::KILL, "Process killed"
   end
 
-  def kill(signal, message)
+  def signal(signal, message)
     check_pid_file!
 
     if running?
-      Process.kill(signal, pid)
+      Process.signal(signal, pid)
       wait_process_end
       puts "#{message}: #{pid}"
     else
@@ -62,10 +63,10 @@ class Daemonizer
   end
 
   def wait_process_end
-    begin_time = Time.now
+    begin_time = Time.utc
 
     loop do
-      timed_out = Time.now > begin_time + WAIT_TIMEOUT.seconds
+      timed_out = Time.utc > begin_time + WAIT_TIMEOUT.seconds
       abort "Process still running after #{WAIT_TIMEOUT} seconds: #{pid}" if timed_out
       break unless Process.exists?(pid)
       sleep WAIT_INTERVAL
@@ -81,7 +82,7 @@ class Daemonizer
   end
 
   def read_pid_file
-    File.exists?(pid_file) && (@pid = File.read(pid_file).to_i)
+    File.exists?(pid_file) && (@pid = File.read(pid_file).to_i64)
   end
 
   def write_pid_file

@@ -34,7 +34,7 @@ def test_action(action, service, expected_status, message, pid_file_present)
 end
 
 def kill_service(service)
-  Process.kill(Signal::KILL, File.read(service + ".pid").to_i)
+  Process.signal(Signal::KILL, File.read(service + ".pid").to_i)
 end
 
 describe "Daemonizer" do
